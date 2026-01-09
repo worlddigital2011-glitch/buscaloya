@@ -59,6 +59,14 @@
         .header-spacer { width: 80px; } 
         .logo-text { font-size: 1.4rem; font-weight: 800; color: var(--primary); font-style: italic; letter-spacing: -0.5px; text-align: center; flex-grow: 1; }
 
+        /* BOTÓN INSTALAR HEADER (Se muestra solo si se puede instalar) */
+        #btnInstall { 
+            display: none; 
+            background: var(--dark); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; 
+            animation: pulse 2s infinite; 
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
         .zone-selector-container { background: var(--primary); padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; color: white; }
         .zone-label { font-size: 0.8rem; font-weight: 700; margin-right: 10px;}
         .zone-select { background: white; border: none; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-family: 'Nunito', sans-serif; font-size: 0.85rem; outline: none; flex-grow: 1; font-weight: 700; cursor: pointer; }
@@ -97,7 +105,14 @@
         .card h3 { margin: 0 0 4px 0; font-size: 1.1rem; color: #111; font-weight: 800; }
         .card p { margin: 0 0 10px 0; color: #666; font-size: 0.9rem; line-height: 1.5; }
 
-        .stars-row { color: var(--star-empty); font-size: 0.75rem; margin-bottom: 6px; display: flex; gap: 2px; }
+        /* ESTRELLAS ESTILO */
+        .stars-row { 
+            color: var(--star-empty); /* Gris muy suave por defecto */
+            font-size: 0.75rem; /* Pequeñas y sutiles */
+            margin-bottom: 6px; 
+            display: flex;
+            gap: 2px;
+        }
         .stars-row .filled { color: var(--gold); } 
 
         .info-row { display: flex; align-items: start; gap: 8px; font-size: 0.85rem; color: #555; margin-bottom: 6px; }
@@ -109,6 +124,7 @@
         .card-logo { width: 65px; height: 65px; object-fit: cover; border-radius: 12px; border: 1px solid #e5e7eb; background-color: #f9fafb; transition: transform 0.2s; }
         .card-logo:hover { transform: scale(1.05); }
 
+        /* COBERTURA EXTRA */
         .coverage-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 0.8rem; color: #666; margin-bottom: 10px; padding-top: 5px; border-top: 1px dashed #eee; }
         .coverage-label { font-weight: 800; font-size: 0.75rem; color: var(--dark); margin-right: 2px; }
         .coverage-icon { color: var(--primary); margin-right: 4px; }
@@ -157,7 +173,12 @@
     <!-- UI Principal -->
     <div class="fixed-header-wrapper">
         <header>
+            <div class="header-spacer"></div> 
             <div class="logo-text">Búscalo <span style="color:#222;">Ya!</span></div>
+            <div class="header-spacer" style="text-align:right;">
+                <!-- BOTÓN INSTALAR EN HEADER (SOLO VISIBLE SI ES POSIBLE) -->
+                <button id="btnInstall" onclick="instalarApp()"><i class="fas fa-download"></i> App</button>
+            </div>
         </header>
 
         <div class="zone-selector-container">
@@ -209,7 +230,8 @@
         let seccionActual = 'inicio';
         let zonaActual = 'Todos'; 
         let favoritos = JSON.parse(localStorage.getItem('misFavoritos')) || []; 
-        
+        let deferredPrompt; 
+
         const container = document.getElementById('listaContainer');
         const filtrosCont = document.getElementById('filtrosContainer');
         const searchInput = document.getElementById('searchInput');
@@ -281,6 +303,25 @@
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             renderList(cat);
+        };
+
+        // --- MANEJO INSTALACIÓN ---
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Mostrar botón en el header
+            document.getElementById('btnInstall').style.display = 'inline-block';
+        });
+        
+        window.instalarApp = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('btnInstall').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
         };
 
         // --- CARGA DATOS ---
@@ -366,12 +407,17 @@
             extras = [...new Set(extras)];
 
             let coberturaExtraHTML = '';
-            if (extras.length > 0 && item.tipo === 'servicio') { 
+            
+            // Lógica Unificada: Mismo estilo para Servicios y Comercios
+            // Solo se muestra si hay subzonas extra (movimiento/envío)
+            if (extras.length > 0 && (item.subzona2 || item.subzona3)) {
+                 let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
+                 // Siempre icono de ruta para indicar cobertura/envio
+                 coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
+            } else if (item.tipo === 'servicio' && extras.length > 0) {
+                 // Servicios siempre muestran cobertura, aunque sea 1 zona
                  let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
-            } else if (extras.length > 0) { 
-                 let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
-                 coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-map-pin coverage-icon"></i> ${badges}</div>`;
             }
 
             let infoAdicional = '';
