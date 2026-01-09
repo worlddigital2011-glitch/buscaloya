@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA -->
+    <meta name="theme-color" content="#ea0b2a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Búscalo Ya">
+    <title>Búscalo Ya! La Plata</title>
+    
+    <!-- MANIFEST -->
+    <link rel="manifest" id="my-manifest">
+    <script>
+        const logoUrl = "https://imgur.com/qrJIT7p.png"; 
+
+        const manifest = {
+            "name": "Búscalo Ya La Plata",
+            "short_name": "BúscaloYa",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#ea0b2a",
+            "icons": [
+                { "src": logoUrl, "sizes": "512x512", "type": "image/png" },
+                { "src": logoUrl, "sizes": "192x192", "type": "image/png" }
+            ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        document.querySelector('#my-manifest').setAttribute('href', URL.createObjectURL(blob));
+
+        let link = document.createElement('link'); link.rel = 'icon'; link.href = logoUrl; document.head.appendChild(link);
+        let appleLink = document.createElement('link'); appleLink.rel = 'apple-touch-icon'; appleLink.href = logoUrl; document.head.appendChild(appleLink);
+    </script>
+    
+    <!-- LIBRERÍAS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --primary: #ea0b2a; --primary-dark: #c90a24; --primary-soft: #fff0f2;  
+            --dark: #1f2937; --whatsapp-grey: #64748b; --gray: #6b7280;          
+            --light-gray: #f3f4f6; --white: #ffffff;
+            --gold: #fbbf24; /* Color estrellas dorado suave */
+            --star-empty: #e5e7eb; /* Gris muy suave para estrellas vacías */
+        }
+        body { font-family: 'Nunito', sans-serif; background-color: var(--light-gray); margin: 0; padding: 0; padding-bottom: 90px; color: #333; }
+
+        /* HEADER FIJO */
+        .fixed-header-wrapper { position: sticky; top: 0; z-index: 100; background-color: var(--light-gray); box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        header { background: var(--white); padding: 10px 15px; display: flex; justify-content: center; align-items: center; height: 55px; border-bottom: 1px solid #f0f0f0; }
+        .logo-text { font-size: 1.4rem; font-weight: 800; color: var(--primary); font-style: italic; letter-spacing: -0.5px; }
+
+        /* MODAL DE INSTALACIÓN (Estilo App Nativa) */
+        #installModal {
+            display: none; /* Se activa con JS */
+            position: fixed;
+            bottom: 20px;
+            left: 5%;
+            width: 90%;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 2000;
+            text-align: center;
+            border: 1px solid #eee;
+            animation: slideUp 0.5s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-content h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--dark); }
+        .modal-content p { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; }
+        .btn-modal { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 0.9rem; }
+        .btn-install-confirm { background: var(--primary); color: white; }
+        .btn-install-cancel { background: #f0f0f0; color: #666; }
+
+        /* BOTÓN AYUDA/CALIFICAR FLOTANTE */
+        .fab-help {
+            position: fixed;
+            bottom: 80px; /* Arriba del menú inferior */
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--dark);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 900;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .fab-help:active { transform: scale(0.9); }
+
+        .zone-selector-container { background: var(--primary); padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; color: white; }
+        .zone-label { font-size: 0.8rem; font-weight: 700; margin-right: 10px;}
+        .zone-select { background: white; border: none; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-family: 'Nunito', sans-serif; font-size: 0.85rem; outline: none; flex-grow: 1; font-weight: 700; cursor: pointer; }
+
+        .search-container { padding: 10px 15px; background: var(--white); border-bottom: 1px solid #f5f5f5; }
+        .search-box { background: var(--light-gray); border-radius: 12px; padding: 8px 15px; display: flex; align-items: center; border: 1px solid transparent; }
+        .search-box input { background: transparent; border: none; width: 100%; margin-left: 10px; outline: none; font-size: 0.9rem; font-family: 'Nunito', sans-serif; color: #333; }
+
+        .filters-wrapper { background: var(--white); overflow-x: auto; white-space: nowrap; padding: 12px 15px; display: flex; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; padding-bottom: 8px; }
+        .filters-wrapper::-webkit-scrollbar { height: 6px; }
+        .filters-wrapper::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        .filters-wrapper.hidden { display: none; }
+        .chip { display: inline-block; padding: 6px 16px; background: var(--light-gray); border-radius: 50px; margin-right: 8px; font-size: 0.8rem; color: var(--gray); border: 1px solid transparent; transition: 0.2s; font-weight: 700; flex-shrink: 0; }
+        .chip:last-child { margin-right: 20px; }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(234, 11, 42, 0.2); }
+
+        .section-title { padding: 20px 15px 10px 15px; font-size: 1.2rem; font-weight: 800; color: #111; display: none; text-align: left; }
+        .section-title.visible { display: block; }
+        .content-area { padding: 0 15px; min-height: 50vh; }
+
+        /* CARDS */
+        .card { background: var(--white); border-radius: 16px; padding: 0; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: relative; overflow: hidden; border: 1px solid transparent; transition: transform 0.2s; }
+        .card-body { padding: 18px; padding-top: 25px; }
+        .card.premium { border: 1px solid rgba(234, 11, 42, 0.3); box-shadow: 0 4px 15px rgba(234, 11, 42, 0.08); order: -1; }
+        .premium-badge { display: none; position: absolute; top: 0; left: 0; background: var(--dark); color: white; font-size: 0.7rem; font-weight: 800; padding: 5px 12px 5px 10px; border-bottom-right-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 5; }
+        .card.premium .premium-badge { display: block; }
+
+        .fav-btn { position: absolute; top: 12px; right: 12px; font-size: 1.2rem; color: #d1d5db; background: rgba(255,255,255,0.8); width: 36px; height: 36px; border-radius: 50%; border: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+        .fav-btn.active { color: var(--primary); background: var(--primary-soft); border-color: var(--primary-soft); }
+
+        .tags-row { margin-bottom: 8px; padding-right: 40px; }
+        .rubro-tag { font-size: 0.7rem; color: var(--gray); font-weight: 700; text-transform: uppercase; background: var(--light-gray); padding: 5px 10px; border-radius: 6px; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+        .zona-tag { font-size: 0.7rem; color: #fff; background: var(--dark); padding: 5px 10px; border-radius: 6px; display: inline-block; vertical-align: middle; margin-bottom: 5px; }
+        .price-tag { display: inline-block; background-color: var(--dark); color: white; font-weight: 800; font-size: 0.9rem; padding: 5px 10px; border-radius: 6px; margin-right: 5px; }
+        .card.alquiler::before { background: var(--dark); width: 4px; position: absolute; top:0; left:0; height: 100%; content:""; }
+        .card h3 { margin: 0 0 4px 0; font-size: 1.1rem; color: #111; font-weight: 800; }
+        .card p { margin: 0 0 10px 0; color: #666; font-size: 0.9rem; line-height: 1.5; }
+
+        /* ESTRELLAS ESTILO */
+        .stars-row { 
+            color: var(--star-empty); /* Gris muy suave por defecto */
+            font-size: 0.75rem; /* Pequeñas y sutiles */
+            margin-bottom: 6px; 
+            display: flex;
+            gap: 2px;
+        }
+        .stars-row .filled { color: var(--gold); } /* Doradas */
+
+        .info-row { display: flex; align-items: start; gap: 8px; font-size: 0.85rem; color: #555; margin-bottom: 6px; }
+        .info-row i { color: var(--primary); width: 16px; text-align: center; margin-top: 3px; font-size: 0.8rem; }
+        
+        .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .card-content { flex: 1; }
+        .card-logo-container { flex-shrink: 0; }
+        .card-logo { width: 65px; height: 65px; object-fit: cover; border-radius: 12px; border: 1px solid #e5e7eb; background-color: #f9fafb; transition: transform 0.2s; }
+        .card-logo:hover { transform: scale(1.05); }
+
+        .coverage-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 0.8rem; color: #666; margin-bottom: 10px; padding-top: 5px; border-top: 1px dashed #eee; }
+        .coverage-label { font-weight: 800; font-size: 0.75rem; color: var(--dark); margin-right: 2px; }
+        .coverage-icon { color: var(--primary); margin-right: 4px; }
+        .coverage-badge { background-color: #fff; color: #555; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid #ddd; }
+
+        .card-actions { display: flex; gap: 10px; padding-top: 15px; border-top: 1px solid #f3f4f6; margin-top: 10px;}
+        .btn { flex: 1; padding: 12px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-whatsapp { background: var(--whatsapp-grey); color: white; box-shadow: 0 4px 6px rgba(100, 116, 139, 0.2); }
+        .btn-call { background: var(--light-gray); color: #4b5563; border: 1px solid transparent; }
+        .btn-instagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; box-shadow: 0 4px 6px rgba(220, 39, 67, 0.2); }
+        .btn-instagram:active { transform: scale(0.98); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); border-top: none; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; gap: 5px; cursor: pointer; transition: 0.2s; }
+        .nav-item.active { color: white; font-weight: 800; transform: scale(1.05); }
+        .nav-item i { font-size: 1.4rem; margin-bottom: 2px; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #aaa; }
+        .loading { text-align: center; padding: 40px; color: var(--primary); font-weight: bold; }
+        .error-msg { text-align: center; padding: 20px; color: red; font-weight: bold; background: #ffe6e6; margin: 20px; border-radius: 10px; }
+        .app-footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.75rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
+        .ios-hint { display: block; margin-top: 5px; font-size: 0.65rem; color: #cbd5e1; text-transform: none; letter-spacing: 0; }
+
+        /* SECCIÓN SUMAR COMERCIO */
+        .add-business-container {
+            margin: 20px 15px 10px 15px;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .add-business-container p {
+            margin: 0 0 15px 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .btn-add-business {
+            display: inline-block;
+            background-color: var(--dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .btn-add-business:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <!-- BOTÓN DE AYUDA / CALIFICAR (Flotante) -->
+    <!-- Formulario de Google ACTUALIZADO -->
+    <a href="https://forms.gle/47465YLFvtpFmTYp7" target="_blank" class="fab-help" title="Calificar Servicio">
+        <i class="fas fa-star"></i>
+    </a>
+
+    <!-- MODAL DE INSTALACIÓN -->
+    <div id="installModal">
+        <div class="modal-content">
+            <h3>📲 Instalar App</h3>
+            <p>Instala <b>Búscalo Ya</b> en tu pantalla de inicio para acceder más rápido y sin internet.</p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-install-cancel" onclick="closeInstallModal()">Ahora no</button>
+                <button class="btn-modal btn-install-confirm" onclick="installAppAction()">Instalar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.body.innerHTML += '<div class="error-msg">⚠️ ERROR: ' + message + '</div>';
+        };
+    </script>
+
+    <div class="fixed-header-wrapper">
+        <header>
+            <div class="logo-text">Búscalo <span style="color:#222;">Ya!</span></div>
+        </header>
+
+        <div class="zone-selector-container">
+            <span class="zone-label"><i class="fas fa-map-marker-alt"></i> Zona:</span>
+            <select id="selectorZona" class="zone-select" onchange="cambiarZona(this.value)">
+                <option value="Todos" selected>Ver Todo</option>
+                <option value="Norte">Norte (City Bell, V. Elisa)</option>
+                <option value="Casco">Casco Urbano</option>
+                <option value="Oeste">Oeste (Olmos, Etcheverry)</option>
+                <option value="Sur">Sur (Los Hornos, Aeropuerto)</option>
+            </select>
+        </div>
+        <div class="search-container" id="mainSearch">
+            <div class="search-box"><i class="fas fa-search" style="color: #9ca3af;"></i><input type="text" id="searchInput" placeholder="¿Qué buscas? (Ej: Pizza, Villa Elisa)"></div>
+        </div>
+        <div class="filters-wrapper" id="filtrosContainer"></div>
+    </div>
+
+    <h2 id="tituloFavoritos" class="section-title">Mis Favoritos ❤️</h2>
+    <h2 id="tituloAlquileres" class="section-title">Alquileres Disponibles 🏠</h2>
+    <h2 id="tituloServicios" class="section-title">Servicios Profesionales 🛠️</h2>
+    
+    <div class="content-area" id="listaContainer">
+        <div class="loading"><i class="fas fa-circle-notch fa-spin"></i> Cargando Datos...</div>
+    </div>
+
+    <!-- SECCIÓN SUMAR COMERCIO -->
+    <div class="add-business-container" id="addBusinessSection">
+        <p>¿Tenés un comercio, servicio o alquilás?</p>
+        <!-- Enlace al Formulario de Registro -->
+        <a href="https://forms.gle/RbbRdDqPUiUwSUFb9" target="_blank" class="btn-add-business">
+            <i class="fas fa-plus-circle"></i> Sumate a Búscalo Ya
+        </a>
+    </div>
+
+    <footer class="app-footer">
+        by MöLDEA.STUDIO
+        <span class="ios-hint">En iPhone: Compartir <i class="fas fa-share-square"></i> > Agregar a Inicio</span>
+    </footer>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="cambiarSeccion('inicio', this)"><i class="fas fa-store"></i> <span>Comercios</span></div>
+        <div class="nav-item" onclick="cambiarSeccion('servicios', this)"><i class="fas fa-user-gear"></i> <span>Servicios</span></div>
+        <div class="nav-item" onclick="cambiarSeccion('alquileres', this)"><i class="fas fa-key"></i> <span>Alquileres</span></div>
+        <div class="nav-item" onclick="cambiarSeccion('favoritos', this)"><i class="fas fa-heart"></i> <span>Favoritos</span></div>
+    </nav>
+
+    <script>
+        // --- URL DEL EXCEL ---
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTX7D1E-dwM489ezwWzfiXPgOije9VAV5-FmdbqNbhlyJN4lj_RhMQsMlH_N_BEY5PSH42b-oTv21AF/pub?output=csv';
+        
+        // -- CONFIG FORMULARIO GOOGLE (PEGA TU LINK AQUI) --
+        const googleFormUrl = "https://forms.gle/47465YLFvtpFmTYp7"; 
+        document.querySelector('.fab-help').href = googleFormUrl;
+
+        let datos = [];
+        let seccionActual = 'inicio';
+        let zonaActual = 'Todos'; 
+        let favoritos = JSON.parse(localStorage.getItem('misFavoritos')) || []; 
+        let deferredPrompt; 
+
+        const container = document.getElementById('listaContainer');
+        const filtrosCont = document.getElementById('filtrosContainer');
+        const searchInput = document.getElementById('searchInput');
+
+        function normalizeText(text) {
+            return text ? text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+        }
+
+        // --- FUNCIONES GLOBALES ---
+        window.cambiarZona = function(nuevaZona) {
+            zonaActual = nuevaZona;
+            renderFilters();
+            renderList();
+        };
+
+        window.cambiarSeccion = function(sec, el) {
+            seccionActual = sec;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            
+            const filtros = document.getElementById('filtrosContainer');
+            const tituloFav = document.getElementById('tituloFavoritos');
+            const tituloAlq = document.getElementById('tituloAlquileres');
+            const tituloServ = document.getElementById('tituloServicios');
+            const search = document.getElementById('mainSearch');
+            const addBusiness = document.getElementById('addBusinessSection');
+
+            // 1. Resetear visibilidad general
+            filtros.classList.remove('hidden');
+            search.style.display = 'block';
+            addBusiness.style.display = 'block';
+            
+            // 2. Ocultar títulos específicos
+            tituloFav.classList.remove('visible');
+            tituloAlq.classList.remove('visible');
+            tituloServ.classList.remove('visible');
+            
+            // 3. Lógica por sección
+            if (sec === 'inicio') {
+                // Comercios (Por defecto)
+                renderFilters();
+                renderList();
+            } else if (sec === 'servicios') {
+                // Servicios (Nueva Sección)
+                renderFilters(); 
+                renderList();
+            } else if (sec === 'alquileres') {
+                // Alquileres
+                tituloAlq.classList.add('visible');
+                renderFilters(); 
+                renderList();
+            } else if (sec === 'favoritos') {
+                // Favoritos
+                filtros.classList.add('hidden'); // Ocultar filtros
+                search.style.display = 'none';   // Ocultar buscador
+                addBusiness.style.display = 'none';
+                tituloFav.classList.add('visible');
+                renderList(); 
+            }
+        };
+
+        window.toggleFavorito = function(id, btnElement) {
+            event.stopPropagation();
+            const index = favoritos.indexOf(id);
+            if (index === -1) favoritos.push(id); else favoritos.splice(index, 1);
+            localStorage.setItem('misFavoritos', JSON.stringify(favoritos));
+            const isFav = favoritos.includes(id);
+            btnElement.innerHTML = `<i class="${isFav ? 'fas' : 'far'} fa-heart"></i>`;
+            btnElement.classList.toggle('active');
+            if (seccionActual === 'favoritos') renderList();
+        };
+
+        window.aplicarFiltro = function(cat, el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderList(cat);
+        };
+
+        // --- MANEJO INSTALACIÓN APP ---
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Mostrar modal en lugar de botón simple
+            document.getElementById('installModal').style.display = 'block';
+        });
+
+        window.closeInstallModal = function() {
+            document.getElementById('installModal').style.display = 'none';
+        }
+
+        window.installAppAction = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('installModal').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        };
+
+        // --- CARGA DE DATOS ---
+        function cargarDatos() {
+            const urlConAntiCache = sheetUrl + '&t=' + Date.now();
+            fetch(urlConAntiCache)
+                .then(response => {
+                    if (!response.ok) throw new Error("Error HTTP: " + response.status);
+                    return response.text();
+                })
+                .then(csvText => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            try {
+                                datos = results.data.map(rawItem => {
+                                    const item = {};
+                                    Object.keys(rawItem).forEach(key => item[key.toLowerCase().trim()] = rawItem[key]);
+                                    const getVal = (keys) => {
+                                        for (let k of keys) if (item[k]) return item[k];
+                                        return '';
+                                    };
+                                    return {
+                                        id: item.id || Math.random().toString(), 
+                                        zona: item.zona,
+                                        // Normalizamos el tipo a minúsculas para evitar errores (Servicio vs servicio)
+                                        tipo: item.tipo ? item.tipo.toLowerCase() : 'comercio',
+                                        nombre: item.nombre,
+                                        rubro: item.rubro,
+                                        desc: item.detalle,
+                                        tel: item.telefono,
+                                        premium: item.premium && item.premium.toLowerCase().includes('si'), 
+                                        precio: item.precio,
+                                        servicios: item.servicios ? item.servicios.split(',').map(s => s.trim()) : [],
+                                        direccion: item.direccion,
+                                        horario: item.horario,
+                                        subzona: getVal(['subzona', 'sub-zona', 'sub zona', 'localidad', 'barrio']),
+                                        subzona2: getVal(['subzona2', 'sub-zona2', 'sub zona 2', 'cobertura']),
+                                        subzona3: getVal(['subzona3', 'sub-zona3', 'sub zona 3']),
+                                        logo: getVal(['logo', 'imagen', 'img', 'foto']), 
+                                        instagram: getVal(['instagram', 'ig', 'insta', 'red social']),
+                                        estrellas: getVal(['estrellas', 'calificacion', 'puntuacion', 'rating']) // NUEVO: ESTRELLAS
+                                    };
+                                }).filter(item => item.nombre); 
+
+                                if (datos.length === 0) container.innerHTML = '<div class="empty-state"><p>Sin datos.</p></div>';
+                                else { renderFilters(); renderList(); }
+                            } catch (e) {
+                                container.innerHTML = '<div class="error-msg">Error procesando: ' + e.message + '</div>';
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    container.innerHTML = '<div class="error-msg">Error de conexión. Intenta recargar.</div>';
+                    console.error(error);
+                });
+        }
+
+        // --- GENERADOR DE ESTRELLAS ---
+        function getStarsHTML(rating) {
+            let stars = rating ? Math.round(parseFloat(rating)) : 0;
+            if (isNaN(stars)) stars = 0;
+            let html = '<div class="stars-row">';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= stars) html += '<i class="fas fa-star filled"></i>'; 
+                else html += '<i class="fas fa-star"></i>'; 
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function generarTarjeta(item) {
+            const isFav = favoritos.includes(item.id);
+            const favIconClass = isFav ? 'fas fa-heart' : 'far fa-heart';
+            const favBtnClass = isFav ? 'fav-btn active' : 'fav-btn';
+            
+            let textoUbicacion = (item.zona && item.subzona) ? `${item.zona} • ${item.subzona}` : (item.subzona || item.zona || '');
+            let badgeZona = textoUbicacion ? `<span class="zona-tag">${textoUbicacion}</span>` : '';
+            
+            let extras = [];
+            if (item.subzona) extras.push(item.subzona);
+            if (item.subzona2) extras.push(item.subzona2);
+            if (item.subzona3) extras.push(item.subzona3);
+            extras = [...new Set(extras)];
+
+            let coberturaExtraHTML = '';
+            if (extras.length > 0) {
+                let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
+                coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
+            }
+
+            let infoAdicional = '';
+            if (item.direccion) infoAdicional += `<div class="info-row"><i class="fas fa-map-marker-alt"></i> ${item.direccion}</div>`;
+            if (item.horario) infoAdicional += `<div class="info-row"><i class="fas fa-clock"></i> ${item.horario}</div>`;
+
+            let logoHTML = '';
+            if (item.logo) {
+                logoHTML = `
+                <div class="card-logo-container">
+                    <img src="${item.logo}" class="card-logo" loading="lazy" alt="${item.nombre}" 
+                         onerror="this.style.display='none'; this.parentElement.style.display='none';">
+                </div>`;
+            }
+
+            let instagramBtn = '';
+            if (item.instagram) {
+                let igUrl = item.instagram.startsWith('http') ? item.instagram : 'https://instagram.com/' + item.instagram.replace('@', '');
+                instagramBtn = `<a href="${igUrl}" target="_blank" class="btn btn-instagram"><i class="fab fa-instagram"></i> Instagram</a>`;
+            }
+
+            let starsHTML = getStarsHTML(item.estrellas); 
+
+            let contenidoPrincipal = ''; 
+            if (item.tipo === 'alquiler') {
+                const serviciosHtml = item.servicios ? item.servicios.map(s => `${s} · `).join('') : '';
+                contenidoPrincipal = `<div class="tags-row"><span class="price-tag">${item.precio || 'Consultar'}</span>${badgeZona}</div>${infoAdicional}<div style="font-size:0.8rem; color:#666; margin-bottom:8px; margin-top:5px;">${serviciosHtml}</div>`;
+            } else {
+                contenidoPrincipal = `<div class="tags-row"><span class="rubro-tag">${item.rubro || 'Varios'}</span>${badgeZona}</div>${coberturaExtraHTML}${infoAdicional}`;
+            }
+
+            const premiumBadge = item.premium ? `<div class="premium-badge"><i class="fas fa-crown"></i> Top</div>` : '';
+
+            return `
+            <div class="card ${item.tipo === 'alquiler' ? 'alquiler' : (item.premium ? 'premium' : '')}">
+                ${premiumBadge}
+                <button class="${favBtnClass}" onclick="toggleFavorito('${item.id}', this)"><i class="${favIconClass}"></i></button>
+                <div class="card-body">
+                    <div class="card-header-flex">
+                        <div class="card-content">
+                            ${contenidoPrincipal}
+                            <h3>${item.nombre}</h3>
+                            ${starsHTML} 
+                            <p>${item.desc || ''}</p>
+                        </div>
+                        ${logoHTML}
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://wa.me/${item.tel}" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                        ${instagramBtn}
+                        <a href="tel:${item.tel}" class="btn btn-call"><i class="fas fa-phone"></i> Llamar</a>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderList(filtroRubro = 'Todos') {
+            container.innerHTML = '';
+            let items = datos;
+            
+            // FILTRO DE SECCION
+            if (seccionActual === 'inicio') items = datos.filter(d => d.tipo === 'comercio');
+            else if (seccionActual === 'servicios') items = datos.filter(d => d.tipo === 'servicio'); // NUEVO FILTRO
+            else if (seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
+            else if (seccionActual === 'favoritos') items = datos.filter(d => favoritos.includes(d.id));
+
+            // FILTRO DE ZONA
+            if (zonaActual !== 'Todos' && seccionActual !== 'favoritos') items = items.filter(d => d.zona === zonaActual);
+            
+            // FILTRO DE RUBRO
+            if (filtroRubro !== 'Todos') items = items.filter(d => d.rubro === filtroRubro);
+
+            items.sort((a, b) => (a.premium === b.premium) ? 0 : a.premium ? -1 : 1);
+
+            if(items.length === 0) {
+                let msg = `No hay resultados.`;
+                if (seccionActual === 'favoritos') msg = "Aún no tienes favoritos.";
+                container.innerHTML = `<div class="empty-state"><i class="far fa-folder-open"></i><p>${msg}</p></div>`;
+            } else {
+                items.forEach(item => container.innerHTML += generarTarjeta(item));
+            }
+        }
+
+        function renderFilters() {
+            let base = [];
+            // Filtros basados en la SECCION actual
+            if (seccionActual === 'inicio') base = datos.filter(d => d.tipo === 'comercio');
+            else if (seccionActual === 'servicios') base = datos.filter(d => d.tipo === 'servicio'); // NUEVO
+            else if (seccionActual === 'alquileres') base = datos.filter(d => d.tipo === 'alquiler');
+            else return; 
+
+            if (zonaActual !== 'Todos') base = base.filter(d => d.zona === zonaActual);
+            const rubros = ['Todos', ...new Set(base.map(d => d.rubro).filter(r=>r))];
+            filtrosCont.innerHTML = rubros.map(r => `<div class="chip ${r === 'Todos' ? 'active' : ''}" onclick="aplicarFiltro('${r}', this)">${r}</div>`).join('');
+        }
+
+        searchInput.addEventListener('keyup', (e) => {
+            const term = normalizeText(e.target.value);
+            let items = datos;
+            
+            // Búsqueda respeta la sección actual
+            if (seccionActual === 'inicio') items = datos.filter(d => d.tipo === 'comercio');
+            else if (seccionActual === 'servicios') items = datos.filter(d => d.tipo === 'servicio');
+            else if (seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
+            
+            if (zonaActual !== 'Todos') items = items.filter(d => d.zona === zonaActual);
+            
+            if(seccionActual !== 'favoritos') {
+                const fil = items.filter(d => 
+                    normalizeText(d.nombre).includes(term) || 
+                    normalizeText(d.rubro).includes(term) || 
+                    normalizeText(d.desc).includes(term) || 
+                    normalizeText(d.direccion).includes(term) ||
+                    normalizeText(d.zona).includes(term) ||
+                    normalizeText(d.subzona).includes(term) ||
+                    normalizeText(d.subzona2).includes(term) ||
+                    normalizeText(d.subzona3).includes(term)
+                );
+                container.innerHTML = '';
+                if(fil.length===0) container.innerHTML = '<div class="empty-state"><p>Sin resultados</p></div>';
+                else fil.forEach(i => container.innerHTML += generarTarjeta(i));
+            }
+        });
+
+        // INICIAR
+        cargarDatos();
+    </script>
+</body>
+</html>
