@@ -14,7 +14,8 @@
     <!-- MANIFEST -->
     <link rel="manifest" id="my-manifest">
     <script>
-        const logoUrl = "https://imgur.com/qrJIT7p.png"; 
+        // CONFIGURACIÓN LOGO APP
+        const logoUrl = "https://i.imgur.com/qrJIT7p.png"; 
 
         const manifest = {
             "name": "Búscalo Ya La Plata",
@@ -31,6 +32,7 @@
         const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
         document.querySelector('#my-manifest').setAttribute('href', URL.createObjectURL(blob));
 
+        // ICONOS NAVEGADOR
         let link = document.createElement('link'); link.rel = 'icon'; link.href = logoUrl; document.head.appendChild(link);
         let appleLink = document.createElement('link'); appleLink.rel = 'apple-touch-icon'; appleLink.href = logoUrl; document.head.appendChild(appleLink);
     </script>
@@ -46,61 +48,24 @@
             --primary: #ea0b2a; --primary-dark: #c90a24; --primary-soft: #fff0f2;  
             --dark: #1f2937; --whatsapp-grey: #64748b; --gray: #6b7280;          
             --light-gray: #f3f4f6; --white: #ffffff;
-            --gold: #fbbf24; /* Color estrellas dorado suave */
-            --star-empty: #e5e7eb; /* Gris muy suave para estrellas vacías */
+            --gold: #fbbf24; 
+            --star-empty: #e5e7eb; 
         }
         body { font-family: 'Nunito', sans-serif; background-color: var(--light-gray); margin: 0; padding: 0; padding-bottom: 90px; color: #333; }
 
         /* HEADER FIJO */
         .fixed-header-wrapper { position: sticky; top: 0; z-index: 100; background-color: var(--light-gray); box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        header { background: var(--white); padding: 10px 15px; display: flex; justify-content: center; align-items: center; height: 55px; border-bottom: 1px solid #f0f0f0; }
-        .logo-text { font-size: 1.4rem; font-weight: 800; color: var(--primary); font-style: italic; letter-spacing: -0.5px; }
+        header { background: var(--white); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; height: 55px; border-bottom: 1px solid #f0f0f0; }
+        .header-spacer { width: 80px; } 
+        .logo-text { font-size: 1.4rem; font-weight: 800; color: var(--primary); font-style: italic; letter-spacing: -0.5px; text-align: center; flex-grow: 1; }
 
-        /* MODAL DE INSTALACIÓN (Estilo App Nativa) */
-        #installModal {
-            display: none; /* Se activa con JS */
-            position: fixed;
-            bottom: 20px;
-            left: 5%;
-            width: 90%;
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 2000;
-            text-align: center;
-            border: 1px solid #eee;
-            animation: slideUp 0.5s ease;
+        /* BOTÓN INSTALAR HEADER (Se muestra solo si se puede instalar) */
+        #btnInstall { 
+            display: none; 
+            background: var(--dark); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; 
+            animation: pulse 2s infinite; 
         }
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .modal-content h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--dark); }
-        .modal-content p { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
-        .modal-actions { display: flex; gap: 10px; }
-        .btn-modal { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 0.9rem; }
-        .btn-install-confirm { background: var(--primary); color: white; }
-        .btn-install-cancel { background: #f0f0f0; color: #666; }
-
-        /* BOTÓN AYUDA/CALIFICAR FLOTANTE */
-        .fab-help {
-            position: fixed;
-            bottom: 80px; /* Arriba del menú inferior */
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: var(--dark);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 900;
-            font-size: 1.2rem;
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-        .fab-help:active { transform: scale(0.9); }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         .zone-selector-container { background: var(--primary); padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; color: white; }
         .zone-label { font-size: 0.8rem; font-weight: 700; margin-right: 10px;}
@@ -140,15 +105,8 @@
         .card h3 { margin: 0 0 4px 0; font-size: 1.1rem; color: #111; font-weight: 800; }
         .card p { margin: 0 0 10px 0; color: #666; font-size: 0.9rem; line-height: 1.5; }
 
-        /* ESTRELLAS ESTILO */
-        .stars-row { 
-            color: var(--star-empty); /* Gris muy suave por defecto */
-            font-size: 0.75rem; /* Pequeñas y sutiles */
-            margin-bottom: 6px; 
-            display: flex;
-            gap: 2px;
-        }
-        .stars-row .filled { color: var(--gold); } /* Doradas */
+        .stars-row { color: var(--star-empty); font-size: 0.75rem; margin-bottom: 6px; display: flex; gap: 2px; }
+        .stars-row .filled { color: var(--gold); } 
 
         .info-row { display: flex; align-items: start; gap: 8px; font-size: 0.85rem; color: #555; margin-bottom: 6px; }
         .info-row i { color: var(--primary); width: 16px; text-align: center; margin-top: 3px; font-size: 0.8rem; }
@@ -182,54 +140,16 @@
         .app-footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.75rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
         .ios-hint { display: block; margin-top: 5px; font-size: 0.65rem; color: #cbd5e1; text-transform: none; letter-spacing: 0; }
 
-        /* SECCIÓN SUMAR COMERCIO */
-        .add-business-container {
-            margin: 20px 15px 10px 15px;
-            padding: 20px;
-            text-align: center;
-            background-color: #fff;
-            border-radius: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        }
-        .add-business-container p {
-            margin: 0 0 15px 0;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        .btn-add-business {
-            display: inline-block;
-            background-color: var(--dark);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
+        .fab-help { position: fixed; bottom: 80px; right: 20px; width: 50px; height: 50px; background: var(--dark); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 900; font-size: 1.2rem; text-decoration: none; transition: transform 0.2s; }
+        .fab-help:active { transform: scale(0.9); }
+
+        .add-business-container { margin: 20px 15px 10px 15px; padding: 20px; text-align: center; background-color: #fff; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .add-business-container p { margin: 0 0 15px 0; color: #666; font-size: 0.9rem; }
+        .btn-add-business { display: inline-block; background-color: var(--dark); color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .btn-add-business:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
-
-    <!-- BOTÓN DE AYUDA / CALIFICAR (Flotante) -->
-    <!-- Formulario de Google ACTUALIZADO -->
-    <a href="https://forms.gle/47465YLFvtpFmTYp7" target="_blank" class="fab-help" title="Calificar Servicio">
-        <i class="fas fa-star"></i>
-    </a>
-
-    <!-- MODAL DE INSTALACIÓN -->
-    <div id="installModal">
-        <div class="modal-content">
-            <h3>📲 Instalar App</h3>
-            <p>Instala <b>Búscalo Ya</b> en tu pantalla de inicio para acceder más rápido y sin internet.</p>
-            <div class="modal-actions">
-                <button class="btn-modal btn-install-cancel" onclick="closeInstallModal()">Ahora no</button>
-                <button class="btn-modal btn-install-confirm" onclick="installAppAction()">Instalar</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
@@ -237,9 +157,19 @@
         };
     </script>
 
+    <!-- Botón Flotante Ayuda -->
+    <a href="https://forms.gle/47465YLFvtpFmTYp7" target="_blank" class="fab-help" title="Calificar Servicio">
+        <i class="fas fa-star"></i>
+    </a>
+
     <div class="fixed-header-wrapper">
         <header>
+            <div class="header-spacer"></div> 
             <div class="logo-text">Búscalo <span style="color:#222;">Ya!</span></div>
+            <div class="header-spacer" style="text-align:right;">
+                <!-- BOTÓN INSTALAR EN HEADER (SOLO VISIBLE SI ES POSIBLE) -->
+                <button id="btnInstall" onclick="instalarApp()"><i class="fas fa-download"></i> App</button>
+            </div>
         </header>
 
         <div class="zone-selector-container">
@@ -253,7 +183,7 @@
             </select>
         </div>
         <div class="search-container" id="mainSearch">
-            <div class="search-box"><i class="fas fa-search" style="color: #9ca3af;"></i><input type="text" id="searchInput" placeholder="¿Qué buscas? (Ej: Pizza, Villa Elisa)"></div>
+            <div class="search-box"><i class="fas fa-search" style="color: #9ca3af;"></i><input type="text" id="searchInput" placeholder="¿Qué buscas?"></div>
         </div>
         <div class="filters-wrapper" id="filtrosContainer"></div>
     </div>
@@ -266,10 +196,8 @@
         <div class="loading"><i class="fas fa-circle-notch fa-spin"></i> Cargando Datos...</div>
     </div>
 
-    <!-- SECCIÓN SUMAR COMERCIO -->
     <div class="add-business-container" id="addBusinessSection">
         <p>¿Tenés un comercio, servicio o alquilás?</p>
-        <!-- Enlace al Formulario de Registro -->
         <a href="https://forms.gle/RbbRdDqPUiUwSUFb9" target="_blank" class="btn-add-business">
             <i class="fas fa-plus-circle"></i> Sumate a Búscalo Ya
         </a>
@@ -288,13 +216,7 @@
     </nav>
 
     <script>
-        // --- URL DEL EXCEL ---
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTX7D1E-dwM489ezwWzfiXPgOije9VAV5-FmdbqNbhlyJN4lj_RhMQsMlH_N_BEY5PSH42b-oTv21AF/pub?output=csv';
-        
-        // -- CONFIG FORMULARIO GOOGLE (PEGA TU LINK AQUI) --
-        const googleFormUrl = "https://forms.gle/47465YLFvtpFmTYp7"; 
-        document.querySelector('.fab-help').href = googleFormUrl;
-
         let datos = [];
         let seccionActual = 'inicio';
         let zonaActual = 'Todos'; 
@@ -328,34 +250,29 @@
             const search = document.getElementById('mainSearch');
             const addBusiness = document.getElementById('addBusinessSection');
 
-            // 1. Resetear visibilidad general
+            // Resetear visibilidad
             filtros.classList.remove('hidden');
             search.style.display = 'block';
             addBusiness.style.display = 'block';
             
-            // 2. Ocultar títulos específicos
             tituloFav.classList.remove('visible');
             tituloAlq.classList.remove('visible');
             tituloServ.classList.remove('visible');
             
-            // 3. Lógica por sección
             if (sec === 'inicio') {
-                // Comercios (Por defecto)
                 renderFilters();
                 renderList();
             } else if (sec === 'servicios') {
-                // Servicios (Nueva Sección)
+                tituloServ.classList.add('visible');
                 renderFilters(); 
                 renderList();
             } else if (sec === 'alquileres') {
-                // Alquileres
                 tituloAlq.classList.add('visible');
                 renderFilters(); 
                 renderList();
             } else if (sec === 'favoritos') {
-                // Favoritos
-                filtros.classList.add('hidden'); // Ocultar filtros
-                search.style.display = 'none';   // Ocultar buscador
+                filtros.classList.add('hidden');
+                search.style.display = 'none';
                 addBusiness.style.display = 'none';
                 tituloFav.classList.add('visible');
                 renderList(); 
@@ -373,41 +290,37 @@
             if (seccionActual === 'favoritos') renderList();
         };
 
+        window.instalarApp = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('btnInstall').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        };
+
         window.aplicarFiltro = function(cat, el) {
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             renderList(cat);
         };
 
-        // --- MANEJO INSTALACIÓN APP ---
+        // --- MANEJO INSTALACIÓN ---
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Mostrar modal en lugar de botón simple
-            document.getElementById('installModal').style.display = 'block';
+            // Mostrar botón en el header
+            document.getElementById('btnInstall').style.display = 'inline-block';
         });
 
-        window.closeInstallModal = function() {
-            document.getElementById('installModal').style.display = 'none';
-        }
-
-        window.installAppAction = async function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    document.getElementById('installModal').style.display = 'none';
-                }
-                deferredPrompt = null;
-            }
-        };
-
-        // --- CARGA DE DATOS ---
+        // --- CARGA DATOS ---
         function cargarDatos() {
             const urlConAntiCache = sheetUrl + '&t=' + Date.now();
             fetch(urlConAntiCache)
                 .then(response => {
-                    if (!response.ok) throw new Error("Error HTTP: " + response.status);
+                    if (!response.ok) throw new Error("Error " + response.status);
                     return response.text();
                 })
                 .then(csvText => {
@@ -426,13 +339,12 @@
                                     return {
                                         id: item.id || Math.random().toString(), 
                                         zona: item.zona,
-                                        // Normalizamos el tipo a minúsculas para evitar errores (Servicio vs servicio)
                                         tipo: item.tipo ? item.tipo.toLowerCase() : 'comercio',
                                         nombre: item.nombre,
                                         rubro: item.rubro,
                                         desc: item.detalle,
                                         tel: item.telefono,
-                                        premium: item.premium && item.premium.toLowerCase().includes('si'), 
+                                        premium: item.premium && item.premium.match(/si|yes|true|premium/i),
                                         precio: item.precio,
                                         servicios: item.servicios ? item.servicios.split(',').map(s => s.trim()) : [],
                                         direccion: item.direccion,
@@ -442,7 +354,7 @@
                                         subzona3: getVal(['subzona3', 'sub-zona3', 'sub zona 3']),
                                         logo: getVal(['logo', 'imagen', 'img', 'foto']), 
                                         instagram: getVal(['instagram', 'ig', 'insta', 'red social']),
-                                        estrellas: getVal(['estrellas', 'calificacion', 'puntuacion', 'rating']) // NUEVO: ESTRELLAS
+                                        estrellas: getVal(['estrellas', 'calificacion', 'puntuacion', 'rating'])
                                     };
                                 }).filter(item => item.nombre); 
 
@@ -455,12 +367,10 @@
                     });
                 })
                 .catch(error => {
-                    container.innerHTML = '<div class="error-msg">Error de conexión. Intenta recargar.</div>';
-                    console.error(error);
+                    container.innerHTML = '<div class="error-msg">Error conexión. Recarga.</div>';
                 });
         }
 
-        // --- GENERADOR DE ESTRELLAS ---
         function getStarsHTML(rating) {
             let stars = rating ? Math.round(parseFloat(rating)) : 0;
             if (isNaN(stars)) stars = 0;
@@ -488,9 +398,12 @@
             extras = [...new Set(extras)];
 
             let coberturaExtraHTML = '';
-            if (extras.length > 0) {
-                let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
-                coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
+            if (extras.length > 0 && item.tipo === 'servicio') { 
+                 let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
+                 coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
+            } else if (extras.length > 0) { 
+                 let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
+                 coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-map-pin coverage-icon"></i> ${badges}</div>`;
             }
 
             let infoAdicional = '';
@@ -499,11 +412,7 @@
 
             let logoHTML = '';
             if (item.logo) {
-                logoHTML = `
-                <div class="card-logo-container">
-                    <img src="${item.logo}" class="card-logo" loading="lazy" alt="${item.nombre}" 
-                         onerror="this.style.display='none'; this.parentElement.style.display='none';">
-                </div>`;
+                logoHTML = `<div class="card-logo-container"><img src="${item.logo}" class="card-logo" loading="lazy" alt="${item.nombre}" onerror="this.style.display='none';"></div>`;
             }
 
             let instagramBtn = '';
@@ -551,16 +460,13 @@
             container.innerHTML = '';
             let items = datos;
             
-            // FILTRO DE SECCION
             if (seccionActual === 'inicio') items = datos.filter(d => d.tipo === 'comercio');
-            else if (seccionActual === 'servicios') items = datos.filter(d => d.tipo === 'servicio'); // NUEVO FILTRO
+            else if (seccionActual === 'servicios') items = datos.filter(d => d.tipo === 'servicio');
             else if (seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
             else if (seccionActual === 'favoritos') items = datos.filter(d => favoritos.includes(d.id));
 
-            // FILTRO DE ZONA
             if (zonaActual !== 'Todos' && seccionActual !== 'favoritos') items = items.filter(d => d.zona === zonaActual);
             
-            // FILTRO DE RUBRO
             if (filtroRubro !== 'Todos') items = items.filter(d => d.rubro === filtroRubro);
 
             items.sort((a, b) => (a.premium === b.premium) ? 0 : a.premium ? -1 : 1);
@@ -576,9 +482,8 @@
 
         function renderFilters() {
             let base = [];
-            // Filtros basados en la SECCION actual
             if (seccionActual === 'inicio') base = datos.filter(d => d.tipo === 'comercio');
-            else if (seccionActual === 'servicios') base = datos.filter(d => d.tipo === 'servicio'); // NUEVO
+            else if (seccionActual === 'servicios') base = datos.filter(d => d.tipo === 'servicio');
             else if (seccionActual === 'alquileres') base = datos.filter(d => d.tipo === 'alquiler');
             else return; 
 
@@ -591,10 +496,9 @@
             const term = normalizeText(e.target.value);
             let items = datos;
             
-            // Búsqueda respeta la sección actual
-            if (seccionActual === 'inicio') items = datos.filter(d => d.tipo === 'comercio');
-            else if (seccionActual === 'servicios') items = datos.filter(d => d.tipo === 'servicio');
-            else if (seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
+            if(seccionActual === 'inicio') items = datos.filter(d => d.tipo === 'comercio');
+            else if(seccionActual === 'servicios') items = datos.filter(d => d.tipo === 'servicio');
+            else if(seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
             
             if (zonaActual !== 'Todos') items = items.filter(d => d.zona === zonaActual);
             
