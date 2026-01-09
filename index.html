@@ -106,13 +106,7 @@
         .card p { margin: 0 0 10px 0; color: #666; font-size: 0.9rem; line-height: 1.5; }
 
         /* ESTRELLAS ESTILO */
-        .stars-row { 
-            color: var(--star-empty); /* Gris muy suave por defecto */
-            font-size: 0.75rem; /* Pequeñas y sutiles */
-            margin-bottom: 6px; 
-            display: flex;
-            gap: 2px;
-        }
+        .stars-row { color: var(--star-empty); font-size: 0.75rem; margin-bottom: 6px; display: flex; gap: 2px; }
         .stars-row .filled { color: var(--gold); } 
 
         .info-row { display: flex; align-items: start; gap: 8px; font-size: 0.85rem; color: #555; margin-bottom: 6px; }
@@ -137,6 +131,55 @@
         .btn-instagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; box-shadow: 0 4px 6px rgba(220, 39, 67, 0.2); }
         .btn-instagram:active { transform: scale(0.98); }
 
+        /* BOTONES REDES SOCIALES (Chiquitos) */
+        .social-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        /* CSS actualizado para botón social que también sirva para <button> */
+        .btn-social { 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            color: white; 
+            border: none;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .btn-facebook { background: #1877F2; }
+        .btn-web { background: var(--dark); }
+        .btn-mail { background: #ea4335; }
+
+        /* SECCIÓN DESPLEGABLE (Ver Más) */
+        .details-container {
+            display: none; /* Oculto por defecto */
+            background: #fafafa;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #ddd;
+            font-size: 0.85rem;
+        }
+        .details-item { margin-bottom: 8px; display: flex; align-items: start; gap: 8px; color: #555; }
+        .details-item i { color: var(--primary); margin-top: 3px; width: 16px; text-align: center; }
+        .details-item strong { color: #333; margin-right: 5px; }
+        
+        .btn-toggle-details {
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 0.8rem;
+            padding: 10px 0 0 0;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+        }
+        .btn-toggle-details:hover { color: var(--primary); }
+
+        /* NAV & FOOTER */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); border-top: none; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; gap: 5px; cursor: pointer; transition: 0.2s; }
         .nav-item.active { color: white; font-weight: 800; transform: scale(1.05); }
@@ -176,7 +219,7 @@
             <div class="header-spacer"></div> 
             <div class="logo-text">Búscalo <span style="color:#222;">Ya!</span></div>
             <div class="header-spacer" style="text-align:right;">
-                <!-- BOTÓN INSTALAR EN HEADER (SOLO VISIBLE SI ES POSIBLE) -->
+                <!-- Botón instalar en header (Back up) -->
                 <button id="btnInstall" onclick="instalarApp()"><i class="fas fa-download"></i> App</button>
             </div>
         </header>
@@ -259,7 +302,6 @@
             const search = document.getElementById('mainSearch');
             const addBusiness = document.getElementById('addBusinessSection');
 
-            // Resetear visibilidad
             filtros.classList.remove('hidden');
             search.style.display = 'block';
             addBusiness.style.display = 'block';
@@ -299,20 +341,39 @@
             if (seccionActual === 'favoritos') renderList();
         };
 
-        window.aplicarFiltro = function(cat, el) {
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            renderList(cat);
+        window.toggleDetails = function(id) {
+            const el = document.getElementById(`details-${id}`);
+            const btn = document.getElementById(`btn-details-${id}`);
+            if (el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'block';
+                btn.innerHTML = '∧ Menos info';
+            } else {
+                el.style.display = 'none';
+                btn.innerHTML = '∨ Ver más info';
+            }
         };
 
-        // --- MANEJO INSTALACIÓN ---
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Mostrar botón en el header
-            document.getElementById('btnInstall').style.display = 'inline-block';
-        });
-        
+        // Función para copiar email al portapapeles
+        window.copiarEmail = function(email, btn) {
+            // Crear elemento temporal
+            const el = document.createElement('textarea');
+            el.value = email;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            // Feedback visual
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+            btn.style.background = '#4CAF50'; // Verde confirmación
+            
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.style.background = ''; // Volver al original
+            }, 2000);
+        };
+
         window.instalarApp = async function() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -323,6 +384,18 @@
                 deferredPrompt = null;
             }
         };
+
+        window.aplicarFiltro = function(cat, el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderList(cat);
+        };
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('btnInstall').style.display = 'inline-block';
+        });
 
         // --- CARGA DATOS ---
         function cargarDatos() {
@@ -363,6 +436,9 @@
                                         subzona3: getVal(['subzona3', 'sub-zona3', 'sub zona 3']),
                                         logo: getVal(['logo', 'imagen', 'img', 'foto']), 
                                         instagram: getVal(['instagram', 'ig', 'insta', 'red social']),
+                                        facebook: getVal(['facebook', 'fb', 'face']),
+                                        web: getVal(['web', 'sitio', 'pagina']),
+                                        email: getVal(['email', 'mail', 'correo']),
                                         estrellas: getVal(['estrellas', 'calificacion', 'puntuacion', 'rating'])
                                     };
                                 }).filter(item => item.nombre); 
@@ -408,17 +484,17 @@
 
             let coberturaExtraHTML = '';
             
-            // Lógica Unificada: Mismo estilo para Servicios y Comercios
-            // Solo se muestra si hay subzonas extra (movimiento/envío)
             if (extras.length > 0 && (item.subzona2 || item.subzona3)) {
                  let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
-                 // Siempre icono de ruta para indicar cobertura/envio
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
             } else if (item.tipo === 'servicio' && extras.length > 0) {
-                 // Servicios siempre muestran cobertura, aunque sea 1 zona
+                 let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
+                 coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
+            } else if (item.tipo === 'comercio' && extras.length > 0 && (item.subzona2 || item.subzona3)) {
                  let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
             }
+
 
             let infoAdicional = '';
             if (item.direccion) infoAdicional += `<div class="info-row"><i class="fas fa-map-marker-alt"></i> ${item.direccion}</div>`;
@@ -437,15 +513,42 @@
 
             let starsHTML = getStarsHTML(item.estrellas); 
 
+            // INFO DETALLADA (Ver Más)
+            let detailsHTML = '';
+            if (item.direccion) detailsHTML += `<div class="details-item"><i class="fas fa-map-marker-alt"></i> ${item.direccion}</div>`;
+            if (item.horario) detailsHTML += `<div class="details-item"><i class="fas fa-clock"></i> ${item.horario}</div>`;
+            
+            if (coberturaExtraHTML) detailsHTML += `<div class="details-item">${coberturaExtraHTML}</div>`;
+
+            let socialButtons = '';
+            if (item.facebook) {
+                 let fbUrl = item.facebook.startsWith('http') ? item.facebook : 'https://facebook.com/' + item.facebook;
+                 socialButtons += `<a href="${fbUrl}" target="_blank" class="btn-social btn-facebook"><i class="fab fa-facebook"></i> Facebook</a>`;
+            }
+            if (item.web) {
+                 let webUrl = item.web.startsWith('http') ? item.web : 'https://' + item.web;
+                 socialButtons += `<a href="${webUrl}" target="_blank" class="btn-social btn-web"><i class="fas fa-globe"></i> Web</a>`;
+            }
+            if (item.email) {
+                 // CAMBIO: Botón copiar email
+                 socialButtons += `<button onclick="copiarEmail('${item.email}', this)" class="btn-social btn-mail"><i class="fas fa-envelope"></i> Mail</button>`;
+            }
+            if (socialButtons) detailsHTML += `<div class="social-row">${socialButtons}</div>`;
+
             let contenidoPrincipal = ''; 
             if (item.tipo === 'alquiler') {
                 const serviciosHtml = item.servicios ? item.servicios.map(s => `${s} · `).join('') : '';
-                contenidoPrincipal = `<div class="tags-row"><span class="price-tag">${item.precio || 'Consultar'}</span>${badgeZona}</div>${infoAdicional}<div style="font-size:0.8rem; color:#666; margin-bottom:8px; margin-top:5px;">${serviciosHtml}</div>`;
+                contenidoPrincipal = `<div class="tags-row"><span class="price-tag">${item.precio || 'Consultar'}</span>${badgeZona}</div><div style="font-size:0.8rem; color:#666; margin-bottom:5px;">${serviciosHtml}</div>`;
             } else {
-                contenidoPrincipal = `<div class="tags-row"><span class="rubro-tag">${item.rubro || 'Varios'}</span>${badgeZona}</div>${coberturaExtraHTML}${infoAdicional}`;
+                contenidoPrincipal = `<div class="tags-row"><span class="rubro-tag">${item.rubro || 'Varios'}</span>${badgeZona}</div>`;
             }
 
             const premiumBadge = item.premium ? `<div class="premium-badge"><i class="fas fa-crown"></i> Top</div>` : '';
+
+            let toggleBtnHTML = '';
+            if (detailsHTML) {
+                toggleBtnHTML = `<button class="btn-toggle-details" id="btn-details-${item.id}" onclick="toggleDetails('${item.id}')">∨ Ver más info</button>`;
+            }
 
             return `
             <div class="card ${item.tipo === 'alquiler' ? 'alquiler' : (item.premium ? 'premium' : '')}">
@@ -461,10 +564,16 @@
                         </div>
                         ${logoHTML}
                     </div>
+                    
                     <div class="card-actions">
                         <a href="https://wa.me/${item.tel}" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
                         ${instagramBtn}
                         <a href="tel:${item.tel}" class="btn btn-call"><i class="fas fa-phone"></i> Llamar</a>
+                    </div>
+
+                    ${toggleBtnHTML}
+                    <div class="details-container" id="details-${item.id}">
+                        ${detailsHTML}
                     </div>
                 </div>
             </div>`;
