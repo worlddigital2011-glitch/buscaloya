@@ -39,7 +39,7 @@
     
     <!-- LIBRERÍAS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
     <style>
@@ -66,8 +66,16 @@
             border-bottom: none; 
         }
         
-        .header-spacer { width: 80px; } 
-        
+        .header-side { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+        }
+        .header-side.right { 
+            justify-content: flex-end; 
+        }
+
+        /* LOGO CENTRAL */
         .logo-text { 
             font-size: 1.6rem; 
             font-weight: 800; 
@@ -76,6 +84,15 @@
             letter-spacing: -0.5px; 
             text-align: center; 
             flex-grow: 1; 
+        }
+
+        /* TEXTO LA PLATA (Derecha) */
+        .city-text {
+            font-family: 'Satisfy', cursive;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 2rem; 
+            transform: rotate(-3deg);
+            white-space: nowrap;
         }
 
         /* BOTÓN INSTALAR HEADER */
@@ -94,16 +111,17 @@
         }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* ZONA SELECTOR (Fondo Rojo, Input Blanco) */
+        /* ZONA SELECTOR (CONTENEDOR DOBLE) */
         .zone-selector-container { 
             background: var(--primary); 
             padding: 0 15px 12px 15px; 
             display: flex; 
             align-items: center; 
-            justify-content: space-between; 
+            justify-content: center; /* Centrado */
+            flex-wrap: wrap;
+            gap: 10px;
             color: white; 
         }
-        .zone-label { font-size: 0.8rem; font-weight: 700; margin-right: 10px; opacity: 0.9; }
         
         .zone-select { 
             background: var(--white); 
@@ -118,8 +136,13 @@
             font-weight: 700; 
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 100%;
         }
-        .zone-select option { color: #333; background: white; }
+
+        /* SEGUNDO SELECTOR (Barrios/Subzonas) */
+        #selectorSubZona {
+            display: none; /* Se muestra solo si se elige zona */
+        }
 
         .search-container { padding: 10px 15px; background: var(--white); border-bottom: 1px solid #f5f5f5; }
         .search-box { background: var(--light-gray); border-radius: 12px; padding: 8px 15px; display: flex; align-items: center; border: 1px solid transparent; }
@@ -135,7 +158,6 @@
 
         .section-title { padding: 20px 15px 10px 15px; font-size: 1.2rem; font-weight: 800; color: #111; display: none; text-align: left; }
         .section-title.visible { display: block; }
-        /* Título vacío para Servicios */
         #tituloServicios.visible { display: block; height: 10px; padding: 0; margin: 0; }
         
         .content-area { padding: 0 15px; min-height: 50vh; }
@@ -166,9 +188,9 @@
         
         .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         .card-content { flex: 1; }
-        .card-logo-container { flex-shrink: 0; }
-        /* LOGO MÁS GRANDE (100x100) */
-        .card-logo { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 1px solid #e5e7eb; background-color: #f9fafb; transition: transform 0.2s; }
+        .card-logo-container { flex-shrink: 0; width: 100%; text-align: center; margin-bottom: 10px; }
+        /* Logo más grande y centrado en el desplegable */
+        .card-logo { width: 120px; height: 120px; object-fit: cover; border-radius: 12px; border: 1px solid #e5e7eb; background-color: #f9fafb; transition: transform 0.2s; }
         .card-logo:hover { transform: scale(1.05); }
 
         .coverage-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 0.8rem; color: #666; margin-bottom: 10px; padding-top: 5px; border-top: 1px dashed #eee; }
@@ -233,24 +255,38 @@
     <!-- UI Principal -->
     <div class="fixed-header-wrapper">
         <header>
-            <div class="header-spacer"></div> 
-            <div class="logo-text">Búscalo <span style="color:black;">Ya!</span></div>
-            <div class="header-spacer" style="text-align:right;">
-                <!-- Botón instalar en header (Blanco/Rojo) -->
+            <div class="header-side">
+                <!-- Botón instalar a la izquierda -->
                 <button id="btnInstall" onclick="instalarApp()"><i class="fas fa-download"></i> App</button>
+            </div>
+            
+            <div class="logo-text">
+                Búscalo <span style="color:white;">Ya!</span>
+            </div>
+            
+            <div class="header-side right">
+                <span class="city-text">La Plata</span>
             </div>
         </header>
 
         <div class="zone-selector-container">
-            <span class="zone-label"><i class="fas fa-map-marker-alt"></i> Zona:</span>
+            <!-- FILTRO DE ZONA -->
             <select id="selectorZona" class="zone-select" onchange="cambiarZona(this.value)">
                 <option value="Todos" selected>Ver Todo</option>
-                <option value="Norte">Norte (City Bell, V. Elisa)</option>
+                <option value="Norte">Norte (Seguí, V. Elisa, City Bell)</option>
                 <option value="Casco">Casco Urbano</option>
                 <option value="Oeste">Oeste (Olmos, Etcheverry)</option>
                 <option value="Sur">Sur (Los Hornos, Aeropuerto)</option>
+                <option value="Este">Este (El Mondongo, Hipódromo)</option>
+            </select>
+
+            <!-- FILTRO DE SUBZONA (DINÁMICO) -->
+            <select id="selectorSubZona" class="zone-select" onchange="cambiarSubZona(this.value)">
+                <option value="Todos">Todos los barrios</option>
+                <!-- Se llena con JS -->
             </select>
         </div>
+
         <div class="search-container" id="mainSearch">
             <div class="search-box"><i class="fas fa-search" style="color: #9ca3af;"></i><input type="text" id="searchInput" placeholder="¿Qué buscas?"></div>
         </div>
@@ -290,23 +326,80 @@
         let datos = [];
         let seccionActual = 'inicio';
         let zonaActual = 'Todos'; 
+        let subZonaActual = 'Todos'; 
         let favoritos = JSON.parse(localStorage.getItem('misFavoritos')) || []; 
         let deferredPrompt; 
 
         const container = document.getElementById('listaContainer');
         const filtrosCont = document.getElementById('filtrosContainer');
         const searchInput = document.getElementById('searchInput');
+        const subZonaSelect = document.getElementById('selectorSubZona');
 
         function normalizeText(text) {
-            return text ? text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+            return text ? text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
         }
 
         // --- FUNCIONES GLOBALES ---
         window.cambiarZona = function(nuevaZona) {
             zonaActual = nuevaZona;
+            subZonaActual = 'Todos'; 
+            actualizarSelectorSubZonas();
             renderFilters();
             renderList();
         };
+
+        window.cambiarSubZona = function(nuevaSubZona) {
+            subZonaActual = nuevaSubZona;
+            renderList(); 
+        };
+
+        // LÓGICA ROBUSTA PARA LLENAR EL SEGUNDO SELECTOR
+        function actualizarSelectorSubZonas() {
+            if (zonaActual === 'Todos') {
+                subZonaSelect.style.display = 'none'; 
+                return;
+            }
+            
+            // 1. Filtramos items de la sección activa
+            let itemsDeSeccion = datos;
+            if (seccionActual === 'inicio') itemsDeSeccion = datos.filter(d => d.tipo === 'comercio');
+            else if (seccionActual === 'servicios') itemsDeSeccion = datos.filter(d => d.tipo === 'servicio');
+            else if (seccionActual === 'alquileres') itemsDeSeccion = datos.filter(d => d.tipo === 'alquiler');
+
+            // 2. Filtramos por la Zona seleccionada
+            const itemsDeZona = itemsDeSeccion.filter(d => normalizeText(d.zona) === normalizeText(zonaActual));
+            
+            // 3. Recolectamos TODOS los barrios de esos items (Col 1, 2 y 3)
+            let barriosMap = new Map();
+            
+            itemsDeZona.forEach(item => {
+                let posibles = [item.subzona, item.subzona2, item.subzona3];
+                
+                posibles.forEach(b => {
+                    if(b) {
+                        let key = normalizeText(b);
+                        // EXCLUSIONES: No mostrar 'alrededores' ni 'la plata' como barrio
+                        if (key && key !== 'alrededores' && key !== 'la plata' && !barriosMap.has(key)) {
+                             barriosMap.set(key, b); // Guardamos el nombre original bonito (con mayusculas)
+                        }
+                    }
+                });
+            });
+            
+            const listaBarrios = Array.from(barriosMap.values()).sort();
+            
+            if (listaBarrios.length === 0) {
+                subZonaSelect.style.display = 'none';
+            } else {
+                let html = '<option value="Todos">Todos los barrios</option>';
+                listaBarrios.forEach(barrio => {
+                    html += `<option value="${barrio}">${barrio}</option>`;
+                });
+                subZonaSelect.innerHTML = html;
+                subZonaSelect.value = 'Todos'; 
+                subZonaSelect.style.display = 'block'; 
+            }
+        }
 
         window.cambiarSeccion = function(sec, el) {
             seccionActual = sec;
@@ -347,6 +440,8 @@
                 tituloFav.classList.add('visible');
                 renderList(); 
             }
+            // Importante: Actualizar el subselector por si cambiamos de sección manteniendo zona
+            actualizarSelectorSubZonas();
         };
 
         window.toggleFavorito = function(id, btnElement) {
@@ -435,10 +530,17 @@
                                         for (let k of keys) if (item[k]) return item[k];
                                         return '';
                                     };
+                                    // Detectar Tipo con "s" final o variaciones
+                                    let tipoRaw = item.tipo ? item.tipo.toLowerCase() : 'comercio';
+                                    let tipoFinal = 'comercio';
+                                    if (tipoRaw.includes('serv')) tipoFinal = 'servicio';
+                                    else if (tipoRaw.includes('alq')) tipoFinal = 'alquiler';
+                                    else if (tipoRaw.includes('comerc')) tipoFinal = 'comercio';
+
                                     return {
                                         id: item.id || Math.random().toString(), 
-                                        zona: item.zona,
-                                        tipo: item.tipo ? item.tipo.toLowerCase() : 'comercio',
+                                        zona: item.zona ? item.zona.trim() : '', 
+                                        tipo: tipoFinal,
                                         nombre: item.nombre,
                                         rubro: item.rubro,
                                         desc: item.detalle,
@@ -506,6 +608,7 @@
                  let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
             } else if (item.tipo === 'servicio' && extras.length > 0) {
+                 // Servicios siempre muestran cobertura, aunque sea 1 zona
                  let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
             } else if (item.tipo === 'comercio' && extras.length > 0 && (item.subzona2 || item.subzona3)) {
@@ -520,6 +623,7 @@
 
             let logoHTML = '';
             if (item.logo) {
+                // Modificado para que el logo se oculte si falla y esté en el container centrado del desplegable
                 logoHTML = `<div class="card-logo-container"><img src="${item.logo}" class="card-logo" loading="lazy" alt="${item.nombre}" onerror="this.style.display='none';"></div>`;
             }
 
@@ -533,6 +637,10 @@
 
             // INFO DETALLADA (Ver Más)
             let detailsHTML = '';
+            
+            // PRIMERO EL LOGO (Si existe)
+            if (logoHTML) detailsHTML += logoHTML;
+
             if (item.direccion) detailsHTML += `<div class="details-item"><i class="fas fa-map-marker-alt"></i> ${item.direccion}</div>`;
             if (item.horario) detailsHTML += `<div class="details-item"><i class="fas fa-clock"></i> ${item.horario}</div>`;
             
@@ -563,7 +671,7 @@
             const premiumBadge = item.premium ? `<div class="premium-badge"><i class="fas fa-crown"></i> Top</div>` : '';
 
             let toggleBtnHTML = '';
-            if (detailsHTML) {
+            if (detailsHTML || logoHTML) { 
                 toggleBtnHTML = `<button class="btn-toggle-details" id="btn-details-${item.id}" onclick="toggleDetails('${item.id}')">∨ Ver más info</button>`;
             }
 
@@ -579,7 +687,7 @@
                             ${starsHTML} 
                             <p>${item.desc || ''}</p>
                         </div>
-                        ${logoHTML}
+                        <!-- Logo eliminado de aquí (header), movido a details -->
                     </div>
                     
                     <div class="card-actions">
@@ -605,7 +713,19 @@
             else if (seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
             else if (seccionActual === 'favoritos') items = datos.filter(d => favoritos.includes(d.id));
 
-            if (zonaActual !== 'Todos' && seccionActual !== 'favoritos') items = items.filter(d => d.zona === zonaActual);
+            // Filtro ZONA
+            if (zonaActual !== 'Todos' && seccionActual !== 'favoritos') {
+                items = items.filter(d => normalizeText(d.zona) === normalizeText(zonaActual));
+            }
+            
+            // Nuevo: Filtro SUBZONA (Comparación segura con los 3 campos de subzona)
+            if (subZonaActual !== 'Todos' && seccionActual !== 'favoritos') {
+                items = items.filter(d => 
+                    normalizeText(d.subzona) === normalizeText(subZonaActual) || 
+                    normalizeText(d.subzona2) === normalizeText(subZonaActual) || 
+                    normalizeText(d.subzona3) === normalizeText(subZonaActual)
+                );
+            }
             
             if (filtroRubro !== 'Todos') items = items.filter(d => d.rubro === filtroRubro);
 
@@ -627,7 +747,16 @@
             else if (seccionActual === 'alquileres') base = datos.filter(d => d.tipo === 'alquiler');
             else return; 
 
-            if (zonaActual !== 'Todos') base = base.filter(d => d.zona === zonaActual);
+            if (zonaActual !== 'Todos') base = base.filter(d => normalizeText(d.zona) === normalizeText(zonaActual));
+            // También filtramos los rubros disponibles por subzona si está seleccionada
+            if (subZonaActual !== 'Todos') {
+                base = base.filter(d => 
+                    normalizeText(d.subzona) === normalizeText(subZonaActual) || 
+                    normalizeText(d.subzona2) === normalizeText(subZonaActual) || 
+                    normalizeText(d.subzona3) === normalizeText(subZonaActual)
+                );
+            }
+            
             const rubros = ['Todos', ...new Set(base.map(d => d.rubro).filter(r=>r))];
             filtrosCont.innerHTML = rubros.map(r => `<div class="chip ${r === 'Todos' ? 'active' : ''}" onclick="aplicarFiltro('${r}', this)">${r}</div>`).join('');
         }
@@ -640,7 +769,7 @@
             else if(seccionActual === 'servicios') items = datos.filter(d => d.tipo === 'servicio');
             else if(seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
             
-            if (zonaActual !== 'Todos') items = items.filter(d => d.zona === zonaActual);
+            if (zonaActual !== 'Todos') items = items.filter(d => normalizeText(d.zona) === normalizeText(zonaActual));
             
             if(seccionActual !== 'favoritos') {
                 const fil = items.filter(d => 
