@@ -53,14 +53,14 @@
         }
         body { font-family: 'Nunito', sans-serif; background-color: var(--light-gray); margin: 0; padding: 0; padding-bottom: 90px; color: #333; }
 
-        /* HEADER FIJO (BANNER ROJO ÚNICO) */
+        /* HEADER FIJO */
         .fixed-header-wrapper { position: sticky; top: 0; z-index: 100; background-color: var(--light-gray); box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         
         header { 
             background: var(--primary); 
             padding: 15px 15px; 
             display: flex; 
-            justify-content: center; 
+            justify-content: space-between; 
             align-items: center; 
             height: 65px; 
             border-bottom: none; 
@@ -86,7 +86,7 @@
             flex-grow: 1; 
         }
 
-        /* TEXTO LA PLATA (Derecha) */
+        /* TEXTO LA PLATA */
         .city-text {
             font-family: 'Satisfy', cursive;
             color: rgba(255, 255, 255, 0.95);
@@ -95,29 +95,104 @@
             white-space: nowrap;
         }
 
-        /* BOTÓN INSTALAR HEADER */
-        #btnInstall { 
-            display: none; 
-            background: var(--white); 
-            color: var(--primary); 
-            border: none; 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 700; 
-            cursor: pointer; 
-            animation: pulse 2s infinite; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        /* BOTÓN MENÚ HAMBURGUESA */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
         }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* ZONA SELECTOR (CONTENEDOR DOBLE) */
+        /* --- MENÚ LATERAL (SIDEBAR) --- */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none; /* Oculto por defecto */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px; /* Oculto a la izquierda */
+            width: 280px;
+            height: 100%;
+            background: white;
+            z-index: 2001;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sidebar-header h2 { margin: 0; font-size: 1.2rem; font-style: italic; }
+        .sidebar-close { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-menu li {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .sidebar-menu button, .sidebar-menu a {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1rem;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+        }
+        .sidebar-menu button:active, .sidebar-menu a:active {
+            background-color: #f9f9f9;
+        }
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        /* ZONA SELECTOR */
         .zone-selector-container { 
             background: var(--primary); 
             padding: 0 15px 12px 15px; 
             display: flex; 
             align-items: center; 
-            justify-content: center; /* Centrado */
+            justify-content: center; 
             flex-wrap: wrap;
             gap: 10px;
             color: white; 
@@ -139,10 +214,7 @@
             max-width: 100%;
         }
 
-        /* SEGUNDO SELECTOR (Barrios/Subzonas) */
-        #selectorSubZona {
-            display: none; /* Se muestra solo si se elige zona */
-        }
+        #selectorSubZona { display: none; }
 
         .search-container { padding: 10px 15px; background: var(--white); border-bottom: 1px solid #f5f5f5; }
         .search-box { background: var(--light-gray); border-radius: 12px; padding: 8px 15px; display: flex; align-items: center; border: 1px solid transparent; }
@@ -230,9 +302,6 @@
         .app-footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.75rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
         .ios-hint { display: block; margin-top: 5px; font-size: 0.65rem; color: #cbd5e1; text-transform: none; letter-spacing: 0; }
 
-        .fab-help { position: fixed; bottom: 80px; right: 20px; width: 50px; height: 50px; background: var(--dark); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 900; font-size: 1.2rem; text-decoration: none; transition: transform 0.2s; }
-        .fab-help:active { transform: scale(0.9); }
-
         .add-business-container { margin: 20px 15px 10px 15px; padding: 20px; text-align: center; background-color: #fff; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         .add-business-container p { margin: 0 0 15px 0; color: #666; font-size: 0.9rem; }
         .btn-add-business { display: inline-block; background-color: var(--dark); color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
@@ -247,17 +316,43 @@
         };
     </script>
 
-    <!-- Botón Flotante Ayuda -->
-    <a href="https://forms.gle/47465YLFvtpFmTYp7" target="_blank" class="fab-help" title="Calificar Servicio">
-        <i class="fas fa-star"></i>
-    </a>
+    <!-- MENÚ LATERAL (Overlay y Sidebar) -->
+    <div class="sidebar-overlay" onclick="toggleMenu()"></div>
+    <div class="sidebar" id="appSidebar">
+        <div class="sidebar-header">
+            <h2>Menú</h2>
+            <button class="sidebar-close" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="https://forms.gle/47465YLFvtpFmTYp7" target="_blank">
+                    <i class="fas fa-star"></i> Calificar Servicio
+                </a>
+            </li>
+            <li id="menuInstallItem" style="display:none;">
+                <button onclick="installAppAction()">
+                    <i class="fas fa-download"></i> Instalar App
+                </button>
+            </li>
+            <li>
+                <button onclick="shareApp()">
+                    <i class="fas fa-share-nodes"></i> Compartir App
+                </button>
+            </li>
+            <li>
+                <button onclick="contactAdmin()">
+                    <i class="fas fa-envelope"></i> Contactar Admin
+                </button>
+            </li>
+        </ul>
+    </div>
 
     <!-- UI Principal -->
     <div class="fixed-header-wrapper">
         <header>
             <div class="header-side">
-                <!-- Botón instalar a la izquierda -->
-                <button id="btnInstall" onclick="instalarApp()"><i class="fas fa-download"></i> App</button>
+                <!-- Botón Menú Hamburguesa -->
+                <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
             </div>
             
             <div class="logo-text">
@@ -339,6 +434,52 @@
             return text ? text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
         }
 
+        // --- FUNCIONES MENÚ LATERAL ---
+        window.toggleMenu = function() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            } else {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+            }
+        };
+
+        window.shareApp = function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Búscalo Ya! La Plata',
+                    text: 'Encontrá comercios y servicios en tu barrio.',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                // Fallback copiar al portapapeles
+                const el = document.createElement('textarea');
+                el.value = window.location.href;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                alert('Enlace copiado al portapapeles');
+            }
+            toggleMenu(); // Cerrar menú
+        };
+
+        window.contactAdmin = function() {
+            const email = "moldea.universo@gmail.com";
+            // Copiar al portapapeles
+            const el = document.createElement('textarea');
+            el.value = email;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert('Mail copiado: ' + email);
+            toggleMenu();
+        };
+
         // --- FUNCIONES GLOBALES ---
         window.cambiarZona = function(nuevaZona) {
             zonaActual = nuevaZona;
@@ -360,28 +501,25 @@
                 return;
             }
             
-            // 1. Filtramos items de la sección activa
             let itemsDeSeccion = datos;
             if (seccionActual === 'inicio') itemsDeSeccion = datos.filter(d => d.tipo === 'comercio');
             else if (seccionActual === 'servicios') itemsDeSeccion = datos.filter(d => d.tipo === 'servicio');
             else if (seccionActual === 'alquileres') itemsDeSeccion = datos.filter(d => d.tipo === 'alquiler');
 
-            // 2. Filtramos por la Zona seleccionada
             const itemsDeZona = itemsDeSeccion.filter(d => normalizeText(d.zona) === normalizeText(zonaActual));
             
-            // 3. Recolectamos TODOS los barrios de esos items (Col 1, 2 y 3)
             let barriosMap = new Map();
             
             itemsDeZona.forEach(item => {
-                let posibles = [item.subzona, item.subzona2, item.subzona3];
+                let posiblesBarrios = [];
+                if (item.subzona) posiblesBarrios.push(item.subzona);
+                if (item.subzona2) posiblesBarrios.push(item.subzona2);
+                if (item.subzona3) posiblesBarrios.push(item.subzona3);
                 
-                posibles.forEach(b => {
-                    if(b) {
-                        let key = normalizeText(b);
-                        // EXCLUSIONES: No mostrar 'alrededores' ni 'la plata' como barrio
-                        if (key && key !== 'alrededores' && key !== 'la plata' && !barriosMap.has(key)) {
-                             barriosMap.set(key, b); // Guardamos el nombre original bonito (con mayusculas)
-                        }
+                posiblesBarrios.forEach(b => {
+                    let key = normalizeText(b);
+                    if (key && key !== 'alrededores' && key !== 'la plata' && !barriosMap.has(key)) {
+                         barriosMap.set(key, b); 
                     }
                 });
             });
@@ -413,7 +551,6 @@
             const search = document.getElementById('mainSearch');
             const addBusiness = document.getElementById('addBusinessSection');
 
-            // Resetear visibilidad
             filtros.classList.remove('hidden');
             search.style.display = 'block';
             addBusiness.style.display = 'block';
@@ -440,7 +577,6 @@
                 tituloFav.classList.add('visible');
                 renderList(); 
             }
-            // Importante: Actualizar el subselector por si cambiamos de sección manteniendo zona
             actualizarSelectorSubZonas();
         };
 
@@ -467,7 +603,6 @@
             }
         };
 
-        // Función para copiar email al portapapeles
         window.copiarEmail = function(email, btn) {
             const el = document.createElement('textarea');
             el.value = email;
@@ -475,11 +610,9 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-
             const originalContent = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
             btn.style.background = '#4CAF50'; 
-            
             setTimeout(() => {
                 btn.innerHTML = originalContent;
                 btn.style.background = ''; 
@@ -491,11 +624,14 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    document.getElementById('btnInstall').style.display = 'none';
+                    // Hide button inside menu
+                    document.getElementById('menuInstallItem').style.display = 'none';
                 }
                 deferredPrompt = null;
             }
         };
+
+        window.installAppAction = window.instalarApp; // Alias for menu
 
         window.aplicarFiltro = function(cat, el) {
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -506,7 +642,9 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('btnInstall').style.display = 'inline-block';
+            // Mostrar opción en el menú
+            const menuItem = document.getElementById('menuInstallItem');
+            if(menuItem) menuItem.style.display = 'block';
         });
 
         // --- CARGA DATOS ---
@@ -530,7 +668,6 @@
                                         for (let k of keys) if (item[k]) return item[k];
                                         return '';
                                     };
-                                    // Detectar Tipo con "s" final o variaciones
                                     let tipoRaw = item.tipo ? item.tipo.toLowerCase() : 'comercio';
                                     let tipoFinal = 'comercio';
                                     if (tipoRaw.includes('serv')) tipoFinal = 'servicio';
@@ -603,12 +740,10 @@
 
             let coberturaExtraHTML = '';
             
-            // Lógica Unificada: Mismo estilo para Servicios y Comercios
             if (extras.length > 0 && (item.subzona2 || item.subzona3)) {
                  let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
             } else if (item.tipo === 'servicio' && extras.length > 0) {
-                 // Servicios siempre muestran cobertura, aunque sea 1 zona
                  let badges = extras.map(z => `<span class="coverage-badge">${z}</span>`).join(' ');
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
             } else if (item.tipo === 'comercio' && extras.length > 0 && (item.subzona2 || item.subzona3)) {
@@ -616,14 +751,12 @@
                  coberturaExtraHTML = `<div class="coverage-row"><i class="fas fa-route coverage-icon"></i> <span class="coverage-label">Zona de Cobertura:</span> ${badges}</div>`;
             }
 
-
             let infoAdicional = '';
             if (item.direccion) infoAdicional += `<div class="info-row"><i class="fas fa-map-marker-alt"></i> ${item.direccion}</div>`;
             if (item.horario) infoAdicional += `<div class="info-row"><i class="fas fa-clock"></i> ${item.horario}</div>`;
 
             let logoHTML = '';
             if (item.logo) {
-                // Modificado para que el logo se oculte si falla y esté en el container centrado del desplegable
                 logoHTML = `<div class="card-logo-container"><img src="${item.logo}" class="card-logo" loading="lazy" alt="${item.nombre}" onerror="this.style.display='none';"></div>`;
             }
 
@@ -635,12 +768,8 @@
 
             let starsHTML = getStarsHTML(item.estrellas); 
 
-            // INFO DETALLADA (Ver Más)
             let detailsHTML = '';
-            
-            // PRIMERO EL LOGO (Si existe)
-            if (logoHTML) detailsHTML += logoHTML;
-
+            if (logoHTML) detailsHTML += logoHTML; 
             if (item.direccion) detailsHTML += `<div class="details-item"><i class="fas fa-map-marker-alt"></i> ${item.direccion}</div>`;
             if (item.horario) detailsHTML += `<div class="details-item"><i class="fas fa-clock"></i> ${item.horario}</div>`;
             
@@ -687,7 +816,6 @@
                             ${starsHTML} 
                             <p>${item.desc || ''}</p>
                         </div>
-                        <!-- Logo eliminado de aquí (header), movido a details -->
                     </div>
                     
                     <div class="card-actions">
@@ -713,12 +841,10 @@
             else if (seccionActual === 'alquileres') items = datos.filter(d => d.tipo === 'alquiler');
             else if (seccionActual === 'favoritos') items = datos.filter(d => favoritos.includes(d.id));
 
-            // Filtro ZONA
             if (zonaActual !== 'Todos' && seccionActual !== 'favoritos') {
                 items = items.filter(d => normalizeText(d.zona) === normalizeText(zonaActual));
             }
             
-            // Nuevo: Filtro SUBZONA (Comparación segura con los 3 campos de subzona)
             if (subZonaActual !== 'Todos' && seccionActual !== 'favoritos') {
                 items = items.filter(d => 
                     normalizeText(d.subzona) === normalizeText(subZonaActual) || 
@@ -748,7 +874,6 @@
             else return; 
 
             if (zonaActual !== 'Todos') base = base.filter(d => normalizeText(d.zona) === normalizeText(zonaActual));
-            // También filtramos los rubros disponibles por subzona si está seleccionada
             if (subZonaActual !== 'Todos') {
                 base = base.filter(d => 
                     normalizeText(d.subzona) === normalizeText(subZonaActual) || 
@@ -793,3 +918,5 @@
     </script>
 </body>
 </html>
+
+
